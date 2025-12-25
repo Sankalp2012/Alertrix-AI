@@ -1,10 +1,13 @@
-import uvicorn
-from app.api import app
+from fastapi import FastAPI
+from app.api import router  # assuming you moved endpoints to api.py
 
-if __name__ == "__main__":
-    uvicorn.run(
-        "app.api:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=False,
-    )
+app = FastAPI(title="Alertrix AI Engine")
+
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "service": "alertrix-ai",
+    }
+
+app.include_router(router)
