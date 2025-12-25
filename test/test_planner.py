@@ -2,7 +2,7 @@ import asyncio
 from app.planner import plan_fetch_strategy
 
 async def test():
-    alert = "Notify me when the cricket match restarts after rain."
+    alert = "aqi over 500 in delhi"
     plan = await plan_fetch_strategy(alert)
 
     print(plan)
