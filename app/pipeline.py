@@ -26,7 +26,12 @@ async def run_alert_pipeline(alert_text: str) -> bool:
                 all_facts.append(facts)
 
     if not all_facts:
-        return False
+         return {
+            "triggered": False,
+            "confidence": 0.0,
+            "reason": "No relevant data could be fetched",
+            "assumptions": []
+        }
 
     consolidated = await consolidate_facts(all_facts, alert_text)
     return await evaluate_alert(consolidated, alert_text)
