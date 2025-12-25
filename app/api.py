@@ -1,25 +1,29 @@
-from fastapi import FastAPI
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.pipeline import run_alert_pipeline
 
-app = FastAPI()
+router = APIRouter(prefix="/api")
 
-class AlertRequest(BaseModel):
+class EvaluateRequest(BaseModel):
     alert_text: str
 
-class AlertResponse(BaseModel):
+class EvaluateResponse(BaseModel):
     triggered: bool
-    confidence: int
+    confidence: float
     reason: str
     assumptions: list[str]
 
-@app.post("/evaluate", response_model=AlertResponse)
-async def evaluate_alert(req: AlertRequest):
-    result = await run_alert_pipeline(req.alert_text)
+@router.post("/evaluate", response_model=EvaluateResponse)
+async def evaluate_alert(req: EvaluateRequest):
+    try:
+        result = await run_alert_pipeline(req.alert_text)
 
-    return {
-        "triggered": result["triggered"],
-        "confidence": result["confidence"],
-        "reason": result["reason"],
-        "assumptions": result["assumptions"],
-    }
+        return EvaluateResponse(
+            triggered=result.get("triggered", False),
+            confidence=result.get("confidence", 0.0),
+            reason=result.get("reason", ""),
+            assumptions=result.get("assumptions", []),
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
